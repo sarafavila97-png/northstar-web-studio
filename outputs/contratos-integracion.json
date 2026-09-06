@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Northstar Web Studio - Contratos lógicos de integración",
+  "description": "Esquemas documentales. Cada frontera se valida contra su definición correspondiente; no son los cuerpos HTTP completos de las APIs.",
+  "$defs": {
+    "fila_formulario": {
+      "type": "object",
+      "required": ["Marca temporal", "Nombre", "Correo electrónico", "Nombre del negocio", "¿Qué necesitas?", "Cuéntanos sobre tu proyecto", "Presupuesto orientativo (USD)", "¿Cuándo te gustaría comenzar?"],
+      "properties": {
+        "Marca temporal": {"type": "string", "minLength": 1},
+        "Nombre": {"type": "string", "minLength": 1},
+        "Correo electrónico": {"type": "string", "format": "email"},
+        "Nombre del negocio": {"type": "string", "minLength": 1},
+        "¿Qué necesitas?": {"enum": ["Sitio web informativo", "Tienda en línea", "Rediseño de un sitio existente", "Todavía no lo tengo claro"]},
+        "Cuéntanos sobre tu proyecto": {"type": "string", "minLength": 1},
+        "Presupuesto orientativo (USD)": {"enum": ["Menos de 1.000 USD", "Entre 1.000 y 2.999 USD", "Entre 3.000 y 5.999 USD", "6.000 USD o más", "Aún no lo sé"]},
+        "¿Cuándo te gustaría comenzar?": {"enum": ["En las próximas 2 semanas", "En el próximo mes", "Dentro de 2 a 3 meses", "Solo estoy explorando opciones"]},
+        "row_number": {"type": "integer", "minimum": 2}
+      },
+      "additionalProperties": true
+    },
+    "datos_para_ia": {
+      "type": "object",
+      "required": ["servicio", "proyecto", "presupuesto", "plazo", "criterios", "tono"],
+      "properties": {
+        "servicio": {"type": "string", "minLength": 1},
+        "proyecto": {"type": "string", "minLength": 1, "maxLength": 2000},
+        "presupuesto": {"type": "string", "minLength": 1},
+        "plazo": {"type": "string", "minLength": 1},
+        "criterios": {"type": "string", "minLength": 1},
+        "tono": {"type": "string", "minLength": 1}
+      },
+      "additionalProperties": false
+    },
+    "salida_ia": {
+      "type": "object",
+      "required": ["puntuacion", "clasificacion", "motivo", "asunto", "cuerpo"],
+      "properties": {
+        "puntuacion": {"type": "integer", "minimum": 0, "maximum": 100},
+        "clasificacion": {"enum": ["Alta", "Media", "Baja"]},
+        "motivo": {"type": "string", "minLength": 1, "maxLength": 1000},
+        "asunto": {"type": "string", "minLength": 1, "maxLength": 300},
+        "cuerpo": {"type": "string", "minLength": 1, "maxLength": 5000}
+      },
+      "oneOf": [
+        {"properties": {"puntuacion": {"minimum": 70}, "clasificacion": {"const": "Alta"}}},
+        {"properties": {"puntuacion": {"minimum": 40, "maximum": 69}, "clasificacion": {"const": "Media"}}},
+        {"properties": {"puntuacion": {"maximum": 39}, "clasificacion": {"const": "Baja"}}}
+      ],
+      "additionalProperties": false
+    },
+    "decision_humana": {
+      "type": "object",
+      "required": ["data"],
+      "properties": {"data": {"type": "object", "required": ["approved"], "properties": {"approved": {"type": "boolean"}}, "additionalProperties": true}},
+      "additionalProperties": true,
+      "description": "Solo data.approved === true autoriza. Si no cumple este contrato, no se envía al cliente."
+    },
+    "resumen_dashboard": {
+      "type": "object",
+      "required": ["total", "enviadas", "rechazadas", "errores", "duplicadas", "tasa", "costo"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 0},
+        "enviadas": {"type": "integer", "minimum": 0},
+        "rechazadas": {"type": "integer", "minimum": 0},
+        "errores": {"type": "integer", "minimum": 0},
+        "duplicadas": {"type": "integer", "minimum": 0},
+        "tasa": {"type": "number", "minimum": 0, "maximum": 100},
+        "costo": {"type": "number", "minimum": 0}
+      },
+      "additionalProperties": false
+    }
+  }
+}
